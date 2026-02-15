@@ -1,69 +1,99 @@
-# template web component
+# Password Input
+![tests](https://github.com/substrate-system/password-input/actions/workflows/nodejs.yml/badge.svg)
+[![types](https://img.shields.io/npm/types/@substrate-system/password-input?style=flat-square)](README.md)
+[![module](https://img.shields.io/badge/module-ESM%2FCJS-blue?style=flat-square)](README.md)
+[![install size](https://flat.badgen.net/packagephobia/install/@bicycle-codes/keys?cache-control=no-cache)](https://packagephobia.com/result?p=@bicycle-codes/keys)
+[![GZip size](https://img.badgesize.io/https%3A%2F%2Fesm.sh%2F%40substrate-system%2Fpassword-input%2Fes2022%2Ffile.mjs?style=flat-square&compression=gzip)](https://esm.sh/@substrate-system/password-input/es2022/password-input.mjs)
+[![dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg?style=flat-square)](package.json)
+[![semantic versioning](https://img.shields.io/badge/semver-2.0.0-blue?logo=semver&style=flat-square)](https://semver.org/)
+[![Common Changelog](https://nichoth.github.io/badge/common-changelog.svg)](./CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-Big_Time-blue?style=flat-square)](LICENSE)
 
-A template for vanilla web components.
 
-## see also
+A password input with less style. See [password-field](https://github.com/substrate-system/password-field)
+for a little bit more style.
 
-* [Web Component lifecycle methods](https://gomakethings.com/the-web-component-lifecycle-methods/)
-* [How to detect when attributes change on a Web Component](https://gomakethings.com/how-to-detect-when-attributes-change-on-a-web-component/)
+[See a live demo](https://substrate-system.github.io/password-input/)
 
-## use
-1. Use the template button in github. Or clone this then
-`rm -rf .git && git init`. Then `npm i && npm init`.
+<details><summary><h2>Contents</h2></summary>
+<!-- toc -->
+</details>
 
-* Use the template system to re-name this module and start the docs:
+## Install
+
 ```sh
-node ./bin/cli.js --package-name=@nichoth/example --component-name=my-component --gh-namespace nichoth --repo-name my-repo-name
+npm i -S @substrate-system/password-input
 ```
 
-__The templates take several variables__
+## API
 
-* `--gh-namespace` -- first path segment on github
-* `--package-name` -- package name, including any namespace. eg, `@alice/package`
-* `--component-name` -- the name of the web component, as used in HTML, eg `cool-example`
-* `--repo-name` -- repository name, the last segment in github URL,
-  eg, `github.com/user/repo-name-here`
+This exposes ESM and common JS via [package.json `exports` field](https://nodejs.org/api/packages.html#exports).
 
+### ESM
+```js
+import { PasswordInput } from '@substrate-system/password-input'
+```
 
-2. Edit the source code in `src/index.ts`.
+### Common JS
+```js
+require('@substrate-system/password-input')
+```
 
-3. Delete either `.github/workflows/gh-pages-docs.yml` or `.github/workflows/gh-pages.yml`, depending on whether you want to deploy an example or docs to github pages.
+## CSS
 
-4. __Edit things__
-    * edit the [build-example](https://github.com/nichoth/template-web-component/blob/c580636f1c912fe2633f7c2478f28b11729c9b80/package.json#L20) command in `package.json` so that it has the right
-    path for github pages
+### Import CSS
 
-## featuring
+```js
+import '@substrate-system/password-input/css'
+```
 
-* compile the source to both ESM and CJS format, and put compiled files in `dist`.
-* ignore `dist` and `*.js` in git, but don't ignore them in npm. That way we
-  don't commit any compiled code to git, but it is available to consumers.
-* use npm's `prepublishOnly` hook to compile the code before publishing to npm.
-* use [exports](./package.json#L41) field in `package.json` to make sure the right format is used
-  by consumers.
-* `preversion` npm hook -- lint
-* `version` npm hook -- generate a TOC for the README, and create and add a
-  changelog
-* `postversion` npm hook -- `git push --follow-tags && npm publish`
-* eslint -- `npm run lint`
-* tests run in a browser environment via `tape-run` -- see [`npm test`](./package.json#L12).
-  Includes `tap` testing tools -- [tapzero](https://github.com/bicycle-codes/tapzero)
-  and [tap-spec](https://www.npmjs.com/package/tap-spec)
-* CI via github actions
-* [stylelint](https://stylelint.io/) -- see [preversion npm hook](https://github.com/nichoth/template-web-component/blob/main/package.json#L25)
+Or minified:
+```js
+import '@substrate-system/password-input/min/css'
+```
 
-## the component
+### Customize CSS via some variables
 
-See *[Web Component lifecycle methods](https://gomakethings.com/the-web-component-lifecycle-methods/)*.
+```css
+password-input {
+    --example: pink;
+}
+```
 
-### [attributeChangedCallback](https://gomakethings.com/how-to-detect-when-attributes-change-on-a-web-component/#the-attributechangedcallback-method)
+## Use
 
-> runs whenever an attribute on the Web Component is added, removed, or changes in value.
+This calls the global function `customElements.define`. Just import, then use
+the tag in your HTML.
 
-> For performance reasons, the attributeChangedCallback() method only watches and reacts to attributes you tell it to. To do that, you create a `static` `observedAttributes` property, with an array of attributes to watch as its value.
+### JS
+```js
+import '@substrate-system/password-input'
+```
 
-> You can use any attributes you’d like, including non-standard ones.
+### HTML
+```html
+<div>
+    <password-input></password-input>
+</div>
+```
 
+### pre-built
+This package exposes minified JS and CSS files too. Copy them to a location that is
+accessible to your web server, then link to them in HTML.
 
-### [disconnectedCallback](https://gomakethings.com/the-web-component-lifecycle-methods/#the-connectedcallback-and-disconnectedcallback-methods)
+#### copy
+```sh
+cp ./node_modules/@substrate-system/password-input/dist/index.min.js ./public/password-input.min.js
+cp ./node_modules/@substrate-system/password-input/dist/style.min.css ./public/password-input.css
+```
 
+#### HTML
+```html
+<head>
+    <link rel="stylesheet" href="./password-input.css">
+</head>
+<body>
+    <!-- ... -->
+    <script type="module" src="./password-input.min.js"></script>
+</body>
+```
