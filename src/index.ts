@@ -1,6 +1,8 @@
+import { WebComponent } from '@substrate-system/web-component'
 import { define } from '@substrate-system/web-component/util'
 import { define as slashDefine } from '@substrate-system/icons/eye-slash'
 import { define as regularDefine } from '@substrate-system/icons/eye-regular'
+import { ARIA_ATTRIBUTES, INPUT_ATTRIBUTES } from './util'
 // import Debug from '@substrate-system/debug'
 // const debug = Debug('password-input')
 
@@ -14,95 +16,11 @@ declare global {
     }
 }
 
-export class PasswordInput extends HTMLElement {
+// export class PasswordInput extends HTMLElement {
+export class PasswordInput extends WebComponent.create('password-input') {
     static TAG = 'password-input'
-    static INPUT_ATTRIBUTES = [
-        'accept',
-        'alt',
-        'autocomplete',
-        'autocapitalize',
-        'autocorrect',
-        'autofocus',
-        'capture',
-        'dirname',
-        'disabled',
-        'enterkeyhint',
-        'form',
-        'inputmode',
-        'list',
-        'max',
-        'maxlength',
-        'min',
-        'minlength',
-        'multiple',
-        'name',
-        'pattern',
-        'placeholder',
-        'readonly',
-        'required',
-        'size',
-        'spellcheck',
-        'step',
-        'tabindex',
-        'title',
-        'value'
-    ]
-
-    static ARIA_ATTRIBUTES = [
-        'aria-activedescendant',
-        'aria-atomic',
-        'aria-autocomplete',
-        'aria-braillelabel',
-        'aria-brailleroledescription',
-        'aria-busy',
-        'aria-checked',
-        'aria-colcount',
-        'aria-colindex',
-        'aria-colindextext',
-        'aria-colspan',
-        'aria-controls',
-        'aria-current',
-        'aria-describedby',
-        'aria-description',
-        'aria-details',
-        'aria-disabled',
-        'aria-dropeffect',
-        'aria-errormessage',
-        'aria-expanded',
-        'aria-flowto',
-        'aria-grabbed',
-        'aria-haspopup',
-        'aria-hidden',
-        'aria-invalid',
-        'aria-keyshortcuts',
-        'aria-label',
-        'aria-labelledby',
-        'aria-level',
-        'aria-live',
-        'aria-modal',
-        'aria-multiline',
-        'aria-multiselectable',
-        'aria-orientation',
-        'aria-owns',
-        'aria-placeholder',
-        'aria-posinset',
-        'aria-pressed',
-        'aria-readonly',
-        'aria-relevant',
-        'aria-required',
-        'aria-roledescription',
-        'aria-rowcount',
-        'aria-rowindex',
-        'aria-rowindextext',
-        'aria-rowspan',
-        'aria-selected',
-        'aria-setsize',
-        'aria-sort',
-        'aria-valuemax',
-        'aria-valuemin',
-        'aria-valuenow',
-        'aria-valuetext'
-    ]
+    static INPUT_ATTRIBUTES = INPUT_ATTRIBUTES
+    static ARIA_ATTRIBUTES = ARIA_ATTRIBUTES
 
     static observedAttributes = (['visible', 'label', 'id'])
         .concat(PasswordInput.INPUT_ATTRIBUTES)
@@ -112,11 +30,14 @@ export class PasswordInput extends HTMLElement {
     inputAriaAttributes:Record<string, string> = {}
     ignoredAriaCallbackNames:Set<string> = new Set()
     ignoredIdCallback = false
+    generatedInputId = `password-input-${Math.random().toString(36).slice(2, 10)}`
 
     // empty string = is visible
     // null = not visible
-    handleChange_visible (_, _newValue) {
+    handleChange_visible (oldValue:string|null, newValue:string|null) {
         this.reRender()
+        if (oldValue === newValue) return
+        this.emit(newValue !== null ? 'show' : 'hide')
     }
 
     handleChange_label (_oldValue, _newValue) {
@@ -262,14 +183,24 @@ export class PasswordInput extends HTMLElement {
             '<eye-slash></eye-slash><span class="visually-hidden">Show</span>')
     }
 
+    getInputIdForRender () {
+        return this.inputId || this.generatedInputId
+    }
+
     /**
      * Change the visibility button state.
      */
     reRender () {
         const btn = this.querySelector('.pw-visibility')
-        btn!.innerHTML = this.getButtonContent()
+        const input = this.querySelector('input')
+        if (!btn || !input) return
+        const inputId = this.getInputIdForRender()
+        btn.innerHTML = this.getButtonContent()
+        btn.setAttribute('aria-pressed', this.isVisible ? 'true' : 'false')
+        btn.setAttribute('aria-controls', inputId)
         this.setAttribute('type', this.getType())
-        this.querySelector('input')?.setAttribute('type', this.getType())
+        input.setAttribute('type', this.getType())
+        input.setAttribute('id', inputId)
     }
 
     render () {
@@ -305,7 +236,8 @@ export class PasswordInput extends HTMLElement {
             .filter(Boolean)
             .join(' ')
 
-        const idAttribute = this.inputId ? `id="${this.inputId}"` : ''
+        const inputId = this.getInputIdForRender()
+        const renderedIdAttribute = `id="${inputId}"`
         const ariaAttributes = Object.entries(this.inputAriaAttributes)
             .map(([attrName, attrValue]) => {
                 return (attrName + (attrValue === '' ?
@@ -315,28 +247,36 @@ export class PasswordInput extends HTMLElement {
             .join(' ')
 
         this.innerHTML = label ? `
-            <label class="${classes}">
-                <span class="label-content">${label}</span>
+            <div class="${classes}">
+                <label class="label-content" for="${inputId}">${label}</label>
                 <span class="input">
                     <input
-                        ${idAttribute}
+                        ${renderedIdAttribute}
                         ${ariaAttributes}
                         ${attrs}
                         type=${this.getType()} />
-                    <button class="pw-visibility">
+                    <button
+                        type="button"
+                        class="pw-visibility"
+                        aria-pressed="${this.isVisible ? 'true' : 'false'}"
+                        aria-controls="${inputId}">
                         ${this.getButtonContent()}
                     </button>
                 </span>
-            </label>
+            </div>
         ` : `
             <div class="${classes}">
                 <span class="input">
                     <input
-                        ${idAttribute}
+                        ${renderedIdAttribute}
                         ${ariaAttributes}
                         ${attrs}
                         type=${this.getType()} />
-                    <button class="pw-visibility">
+                    <button
+                        type="button"
+                        class="pw-visibility"
+                        aria-pressed="${this.isVisible ? 'true' : 'false'}"
+                        aria-controls="${inputId}">
                         ${this.getButtonContent()}
                     </button>
                 </span>

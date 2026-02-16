@@ -21,12 +21,23 @@ test('renders a label element when label is present', async t => {
     const el = await waitFor('password-input')
     const label = el?.querySelector('label')
     const labelContent = el?.querySelector('.label-content')
+    const input = el?.querySelector('input')
 
     t.ok(label, 'should render a label element')
     t.equal(
         labelContent?.textContent?.trim(),
         'Account Password',
         'should render label text'
+    )
+    t.equal(
+        label?.getAttribute('for'),
+        input?.getAttribute('id'),
+        'should associate label with input id'
+    )
+    t.equal(
+        label?.querySelector('button'),
+        null,
+        'should not nest toggle button inside label'
     )
 })
 
@@ -147,6 +158,46 @@ test('updates inner input when forwarded attrs change on host', async t => {
 
     t.equal(input?.getAttribute('autocomplete'), null, 'should remove autocomplete from input')
     t.equal(input?.getAttribute('minlength'), null, 'should remove minlength from input')
+})
+
+test('visibility toggle button has button semantics and state', async t => {
+    document.body.innerHTML = `
+        <password-input></password-input>
+    `
+
+    const el = await waitFor('password-input')
+    const button = el?.querySelector('.pw-visibility') as HTMLButtonElement | null
+    const input = el?.querySelector('input')
+
+    t.equal(button?.getAttribute('type'), 'button', 'should render a non-submit button')
+    t.equal(button?.getAttribute('aria-pressed'), 'false', 'should start unpressed')
+    t.equal(button?.getAttribute('aria-controls'), input?.getAttribute('id'), 'should reference input')
+
+    button?.click()
+    t.equal(button?.getAttribute('aria-pressed'), 'true', 'should update state after toggle')
+})
+
+test('emits show and hide events when visibility changes', async t => {
+    document.body.innerHTML = `
+        <password-input></password-input>
+    `
+
+    const el = await waitFor('password-input')
+    const button = el?.querySelector('.pw-visibility') as HTMLButtonElement | null
+    const seen:string[] = []
+
+    el?.addEventListener('password-input:show', () => {
+        seen.push('show')
+    })
+
+    el?.addEventListener('password-input:hide', () => {
+        seen.push('hide')
+    })
+
+    button?.click()
+    button?.click()
+
+    t.equal(seen.join(','), 'show,hide', 'should emit show then hide')
 })
 
 test('all done', () => {

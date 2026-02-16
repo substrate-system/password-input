@@ -10,6 +10,7 @@ if (import.meta.env.DEV || import.meta.env.MODE === 'staging') {
 document.body.innerHTML += `
     <form>
         <password-input
+            autocomplete="new-password"
             name="example"
             aria-describedby="label-explanation"
             id="example"
@@ -25,6 +26,7 @@ document.body.innerHTML += `
     <form>
         <label for="nolabel">No label attribute</label>
         <password-input
+            autocomplete="new-password"
             id="nolabel"
             placeholder="my secret string"
             aria-describedby="explanation"
