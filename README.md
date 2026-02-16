@@ -1,5 +1,5 @@
 # Password Input
-![tests](https://github.com/substrate-system/password-input/actions/workflows/nodejs.yml/badge.svg)
+[![tests](https://img.shields.io/github/actions/workflow/status/substrate-system/password-input/nodejs.yml?style=flat-square)](https://github.com/substrate-system/password-input/actions/workflows/nodejs.yml)
 [![types](https://img.shields.io/npm/types/@substrate-system/password-input?style=flat-square)](README.md)
 [![module](https://img.shields.io/badge/module-ESM%2FCJS-blue?style=flat-square)](README.md)
 [![install size](https://flat.badgen.net/packagephobia/install/@bicycle-codes/keys?cache-control=no-cache)](https://packagephobia.com/result?p=@bicycle-codes/keys)
