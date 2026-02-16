@@ -1,10 +1,10 @@
 import { define } from '@substrate-system/web-component/util'
-import { define as eyeDefine } from '@substrate-system/icons/eye-slash'
+import { define as slashDefine } from '@substrate-system/icons/eye-slash'
 import { define as regularDefine } from '@substrate-system/icons/eye-regular'
 import Debug from '@substrate-system/debug'
 const debug = Debug('password-input')
 
-eyeDefine()
+slashDefine()
 regularDefine()
 
 // for docuement.querySelector
@@ -73,8 +73,8 @@ export class PasswordInput extends HTMLElement {
 
     getButtonContent () {
         return (this.isVisible ?
-            '<eye-slash></eye-slash><span class="visually-hidden">Hide</span>' :
-            '<eye-regular></eye-regular><span class="visually-hidden">Show</span>')
+            '<eye-regular></eye-regular><span class="visually-hidden">Show</span>' :
+            '<eye-slash></eye-slash><span class="visually-hidden">Hide</span>')
     }
 
     reRender () {
