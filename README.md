@@ -10,13 +10,33 @@
 [![license](https://img.shields.io/badge/license-Big_Time-blue?style=flat-square)](LICENSE)
 
 
-A password input with less style. See [password-field](https://github.com/substrate-system/password-field)
-for a little bit more style.
+A password input with less style than
+[password-field](https://github.com/substrate-system/password-field).
+
+Accessible by default &mdash; `aria-*` attributes, the `id` attribute, and a
+`label` attribute, if present, are all handled correctly.
+
 
 [See a live demo](https://substrate-system.github.io/password-input/)
 
 <details><summary><h2>Contents</h2></summary>
+
 <!-- toc -->
+
+- [Install](#install)
+- [API](#api)
+  * [ESM](#esm)
+  * [Common JS](#common-js)
+- [CSS](#css)
+  * [Import CSS](#import-css)
+  * [Customize CSS via some variables](#customize-css-via-some-variables)
+- [Use](#use)
+  * [JS](#js)
+  * [HTML](#html)
+  * [pre-built](#pre-built)
+
+<!-- tocstop -->
+
 </details>
 
 ## Install
@@ -38,28 +58,6 @@ import { PasswordInput } from '@substrate-system/password-input'
 ```js
 require('@substrate-system/password-input')
 ```
-
-## CSS
-
-### Import CSS
-
-```js
-import '@substrate-system/password-input/css'
-```
-
-Or minified:
-```js
-import '@substrate-system/password-input/min/css'
-```
-
-### Customize CSS via some variables
-
-```css
-password-input {
-    --example: pink;
-}
-```
-
 ## Use
 
 This calls the global function `customElements.define`. Just import, then use
@@ -97,3 +95,43 @@ cp ./node_modules/@substrate-system/password-input/dist/style.min.css ./public/p
     <script type="module" src="./password-input.min.js"></script>
 </body>
 ```
+
+---
+
+## CSS
+
+### Import CSS
+
+```js
+import '@substrate-system/password-input/css'
+```
+
+Or minified:
+```js
+import '@substrate-system/password-input/min/css'
+```
+
+---
+
+## Notes
+
+Implementation notes.
+
+### `ignoredAriaCallbackNames` property
+
+1. You set an `aria-*` attribute on `<password-input>`.
+2. `attributeChangedCallback` routes to `handleChange_aria` (index.ts (line 105)).
+3. `handleChange_aria` copies that value to the inner `<input>`
+   (index.ts (line 189)).
+4. Then it removes the same `aria-*` from the host (index.ts (line 194))
+   so host stays clean.
+5. That removal triggers `attributeChangedCallback` again with
+   `newValue === null`.
+6. The guard sees the name in `ignoredAriaCallbackNames`, deletes it, and
+   returns early (index.ts (line 178)),
+   so it does not remove the attribute from the input/cache.
+
+
+Without this guard, the second callback would treat the host removal as a
+real “delete” request and clear the input attribute you just transferred.
+

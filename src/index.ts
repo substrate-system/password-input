@@ -1,8 +1,8 @@
 import { define } from '@substrate-system/web-component/util'
 import { define as slashDefine } from '@substrate-system/icons/eye-slash'
 import { define as regularDefine } from '@substrate-system/icons/eye-regular'
-import Debug from '@substrate-system/debug'
-const debug = Debug('password-input')
+// import Debug from '@substrate-system/debug'
+// const debug = Debug('password-input')
 
 slashDefine()
 regularDefine()
@@ -16,12 +16,103 @@ declare global {
 
 export class PasswordInput extends HTMLElement {
     static TAG = 'password-input'
-    static observedAttributes = ['visible']
+    static ARIA_ATTRIBUTES = [
+        'aria-activedescendant',
+        'aria-atomic',
+        'aria-autocomplete',
+        'aria-braillelabel',
+        'aria-brailleroledescription',
+        'aria-busy',
+        'aria-checked',
+        'aria-colcount',
+        'aria-colindex',
+        'aria-colindextext',
+        'aria-colspan',
+        'aria-controls',
+        'aria-current',
+        'aria-describedby',
+        'aria-description',
+        'aria-details',
+        'aria-disabled',
+        'aria-dropeffect',
+        'aria-errormessage',
+        'aria-expanded',
+        'aria-flowto',
+        'aria-grabbed',
+        'aria-haspopup',
+        'aria-hidden',
+        'aria-invalid',
+        'aria-keyshortcuts',
+        'aria-label',
+        'aria-labelledby',
+        'aria-level',
+        'aria-live',
+        'aria-modal',
+        'aria-multiline',
+        'aria-multiselectable',
+        'aria-orientation',
+        'aria-owns',
+        'aria-placeholder',
+        'aria-posinset',
+        'aria-pressed',
+        'aria-readonly',
+        'aria-relevant',
+        'aria-required',
+        'aria-roledescription',
+        'aria-rowcount',
+        'aria-rowindex',
+        'aria-rowindextext',
+        'aria-rowspan',
+        'aria-selected',
+        'aria-setsize',
+        'aria-sort',
+        'aria-valuemax',
+        'aria-valuemin',
+        'aria-valuenow',
+        'aria-valuetext'
+    ]
+
+    static observedAttributes = (['visible', 'label'])
+        .concat(PasswordInput.ARIA_ATTRIBUTES)
+
+    inputId:string|null = null
+    inputAriaAttributes:Record<string, string> = {}
+    ignoredAriaCallbackNames:Set<string> = new Set()
 
     // empty string = is visible
     // null = not visible
     handleChange_visible (_, _newValue) {
         this.reRender()
+    }
+
+    handleChange_label (_oldValue, _newValue) {
+        this.render()
+        this._listen()
+    }
+
+    handleChange_aria (
+        name:string,
+        _oldValue:string|null,
+        newValue:string|null
+    ) {
+        if (this.ignoredAriaCallbackNames.has(name)) {
+            this.ignoredAriaCallbackNames.delete(name)
+            return
+        }
+
+        if (newValue === null) {
+            delete this.inputAriaAttributes[name]
+            this.querySelector('input')?.removeAttribute(name)
+            return
+        }
+
+        this.inputAriaAttributes[name] = newValue
+        this.querySelector('input')?.setAttribute(name, newValue)
+
+        if (this.hasAttribute(name)) {
+            this.ignoredAriaCallbackNames.add(name)
+            this.removeAttribute(name)
+        }
     }
 
     /**
@@ -36,6 +127,11 @@ export class PasswordInput extends HTMLElement {
         oldValue:string,
         newValue:string
     ) {
+        if (name.startsWith('aria-')) {
+            this.handleChange_aria(name, oldValue, newValue)
+            return
+        }
+
         if (this[`handleChange_${name}`]) {
             this[`handleChange_${name}`](oldValue, newValue)
         }
@@ -50,7 +146,6 @@ export class PasswordInput extends HTMLElement {
         const btn = this.querySelector('button')!
         btn.addEventListener('click', (ev) => {
             ev.preventDefault()
-            debug('clicking...')
             this.isVisible = !this.isVisible
         })
     }
@@ -71,12 +166,28 @@ export class PasswordInput extends HTMLElement {
         return this.hasAttribute('visible')
     }
 
-    getButtonContent () {
-        return (this.isVisible ?
-            '<eye-regular></eye-regular><span class="visually-hidden">Show</span>' :
-            '<eye-slash></eye-slash><span class="visually-hidden">Hide</span>')
+    set label (value:string|null) {
+        if (value === null) {
+            this.removeAttribute('label')
+            return
+        }
+
+        this.setAttribute('label', value)
     }
 
+    get label ():string|null {
+        return this.getAttribute('label')
+    }
+
+    getButtonContent () {
+        return (this.isVisible ?
+            '<eye-regular></eye-regular><span class="visually-hidden">Hide</span>' :
+            '<eye-slash></eye-slash><span class="visually-hidden">Show</span>')
+    }
+
+    /**
+     * Change the visibility button state.
+     */
     reRender () {
         const btn = this.querySelector('.pw-visibility')
         btn!.innerHTML = this.getButtonContent()
@@ -86,9 +197,26 @@ export class PasswordInput extends HTMLElement {
 
     render () {
         const name = this.getAttribute('name')
+        const label = this.getAttribute('label')
+        const hostId = this.getAttribute('id')
+        const hostAriaAttributes = Array.from(this.attributes)
+            .filter(attr => attr.name.startsWith('aria-'))
+
+        if (hostId !== null) {
+            this.inputId = hostId
+        }
+
+        for (const attr of hostAriaAttributes) {
+            this.inputAriaAttributes[attr.name] = attr.value
+        }
 
         // create object from attributes
         const attrs = Array.from(this.attributes)
+            .filter(attr =>
+                attr.name !== 'label' &&
+                attr.name !== 'id' &&
+                !attr.name.startsWith('aria-')
+            )
             .map(attr => attr.name + (attr.value === '' ?
                 '' :
                 ('=' + `"${attr.value}"`))
@@ -100,13 +228,49 @@ export class PasswordInput extends HTMLElement {
             .filter(Boolean)
             .join(' ')
 
-        this.innerHTML = `<div class="${classes}">
-            <input ${attrs} type=${this.getType()} />
+        const idAttribute = this.inputId ? `id="${this.inputId}"` : ''
+        const ariaAttributes = Object.entries(this.inputAriaAttributes)
+            .map(([attrName, attrValue]) => {
+                return (attrName + (attrValue === '' ?
+                    '' :
+                    ('=' + `"${attrValue}"`)))
+            })
+            .join(' ')
 
-            <button class="pw-visibility">
-                ${this.getButtonContent()}
-            </button>
-        </div>`
+        this.innerHTML = label ? `
+            <label class="${classes}">
+                <span class="label-content">${label}</span>
+                <span class="input">
+                    <input
+                        ${idAttribute}
+                        ${ariaAttributes}
+                        ${attrs}
+                        type=${this.getType()} />
+                    <button class="pw-visibility">
+                        ${this.getButtonContent()}
+                    </button>
+                </span>
+            </label>
+        ` : `
+            <div class="${classes}">
+                <span class="input">
+                    <input
+                        ${idAttribute}
+                        ${ariaAttributes}
+                        ${attrs}
+                        type=${this.getType()} />
+                    <button class="pw-visibility">
+                        ${this.getButtonContent()}
+                    </button>
+                </span>
+            </div>
+        `
+
+        this.removeAttribute('id')
+        for (const attr of hostAriaAttributes) {
+            this.ignoredAriaCallbackNames.add(attr.name)
+            this.removeAttribute(attr.name)
+        }
     }
 }
 

@@ -4,12 +4,24 @@
 password-input {
     display: block;
 
-    & div.password.input {
+    & .password.input {
         min-width: 100%;
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
+
+        & .label-content {
+            width: 100%;
+        }
+
+        & span.input {
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
 
         & input {
+            transition: all 0.2s;
             padding: 1rem;
             padding-bottom: 0.8rem;
             width: 100%;
@@ -20,34 +32,38 @@ password-input {
             &:focus {
                 outline: 1px solid;
             }
+
+            &:disabled {
+                & + .pw-visibility {
+                    opacity: 0.4;
+                    pointer-events: none;
+                    cursor: default;
+                }
+            }
         }
 
         & button.pw-visibility {
+            transition: all 0.2s;
             border: none;
             background-color: transparent;
             cursor: pointer;
             width: 2.4rem;
             height: 2.4rem;
             position: relative;
-            right: 2.5rem;
+            right: 3rem;
+            outline: 2px solid transparent;
+
+            &:focus-visible {
+                & .icon {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                outline: 2px solid;
+                outline-offset: 2px;
+            }
         }
     }
-}
-
-password-input .password.input > .pw-visibility .icon {
-    width: 100%;
-    height: 100%;
-}
-
-password-input .password.input > .pw-visibility:focus-visible {
-    outline: 2px solid var(--password-input-focus-color);
-    outline-offset: 2px;
-}
-
-password-input .password.input > input:disabled + .pw-visibility {
-    opacity: 0.55;
-    pointer-events: none;
-    cursor: default;
 }
 
 /**

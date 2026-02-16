@@ -1,8 +1,23 @@
-password-input {
-    margin: 0 auto;
-    width: 50vw;
+body {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
 
+form {
+    margin: 2rem auto;
+    width: 50vw;
+}
+
+password-input {
     & input {
         font-size: 1rem;
     }
+
+    /*
+        Example of style for the label text.
+    */
+    & .label-content {
+        margin-bottom: 0.2rem;
+    }
+
+    margin-bottom: 0.5rem;
 }
