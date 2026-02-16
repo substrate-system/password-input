@@ -109,6 +109,46 @@ test('updates inner input when aria-* attrs change on host', async t => {
     )
 })
 
+test('updates inner input when forwarded attrs change on host', async t => {
+    document.body.innerHTML = `
+        <password-input autocomplete="new-password" minlength="8"></password-input>
+    `
+
+    const el = await waitFor('password-input')
+    const input = el?.querySelector('input')
+
+    t.equal(
+        input?.getAttribute('autocomplete'),
+        'new-password',
+        'should set initial autocomplete on input'
+    )
+    t.equal(
+        input?.getAttribute('minlength'),
+        '8',
+        'should set initial minlength on input'
+    )
+
+    el?.setAttribute('autocomplete', 'current-password')
+    el?.setAttribute('minlength', '12')
+
+    t.equal(
+        input?.getAttribute('autocomplete'),
+        'current-password',
+        'should update autocomplete on input'
+    )
+    t.equal(
+        input?.getAttribute('minlength'),
+        '12',
+        'should update minlength on input'
+    )
+
+    el?.removeAttribute('autocomplete')
+    el?.removeAttribute('minlength')
+
+    t.equal(input?.getAttribute('autocomplete'), null, 'should remove autocomplete from input')
+    t.equal(input?.getAttribute('minlength'), null, 'should remove minlength from input')
+})
+
 test('all done', () => {
     // @ts-expect-error tests
     window.testsFinished = true

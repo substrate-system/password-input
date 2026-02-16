@@ -16,6 +16,38 @@ declare global {
 
 export class PasswordInput extends HTMLElement {
     static TAG = 'password-input'
+    static INPUT_ATTRIBUTES = [
+        'accept',
+        'alt',
+        'autocomplete',
+        'autocapitalize',
+        'autocorrect',
+        'autofocus',
+        'capture',
+        'dirname',
+        'disabled',
+        'enterkeyhint',
+        'form',
+        'inputmode',
+        'list',
+        'max',
+        'maxlength',
+        'min',
+        'minlength',
+        'multiple',
+        'name',
+        'pattern',
+        'placeholder',
+        'readonly',
+        'required',
+        'size',
+        'spellcheck',
+        'step',
+        'tabindex',
+        'title',
+        'value'
+    ]
+
     static ARIA_ATTRIBUTES = [
         'aria-activedescendant',
         'aria-atomic',
@@ -72,12 +104,14 @@ export class PasswordInput extends HTMLElement {
         'aria-valuetext'
     ]
 
-    static observedAttributes = (['visible', 'label'])
+    static observedAttributes = (['visible', 'label', 'id'])
+        .concat(PasswordInput.INPUT_ATTRIBUTES)
         .concat(PasswordInput.ARIA_ATTRIBUTES)
 
     inputId:string|null = null
     inputAriaAttributes:Record<string, string> = {}
     ignoredAriaCallbackNames:Set<string> = new Set()
+    ignoredIdCallback = false
 
     // empty string = is visible
     // null = not visible
@@ -115,6 +149,39 @@ export class PasswordInput extends HTMLElement {
         }
     }
 
+    handleChange_id (_oldValue:string|null, newValue:string|null) {
+        if (this.ignoredIdCallback) {
+            this.ignoredIdCallback = false
+            return
+        }
+
+        if (newValue === null) {
+            this.inputId = null
+            this.querySelector('input')?.removeAttribute('id')
+            return
+        }
+
+        this.inputId = newValue
+        this.querySelector('input')?.setAttribute('id', newValue)
+
+        if (this.hasAttribute('id')) {
+            this.ignoredIdCallback = true
+            this.removeAttribute('id')
+        }
+    }
+
+    handleChange_inputAttribute (name:string, newValue:string|null) {
+        const input = this.querySelector('input')
+        if (!input) return
+
+        if (newValue === null) {
+            input.removeAttribute(name)
+            return
+        }
+
+        input.setAttribute(name, newValue)
+    }
+
     /**
      * Listen for change in visiblity.
      *
@@ -127,8 +194,18 @@ export class PasswordInput extends HTMLElement {
         oldValue:string,
         newValue:string
     ) {
+        if (name === 'id') {
+            this.handleChange_id(oldValue, newValue)
+            return
+        }
+
         if (name.startsWith('aria-')) {
             this.handleChange_aria(name, oldValue, newValue)
+            return
+        }
+
+        if (PasswordInput.INPUT_ATTRIBUTES.includes(name)) {
+            this.handleChange_inputAttribute(name, newValue)
             return
         }
 
@@ -210,7 +287,7 @@ export class PasswordInput extends HTMLElement {
             this.inputAriaAttributes[attr.name] = attr.value
         }
 
-        // create object from attributes
+        // create string from attributes
         const attrs = Array.from(this.attributes)
             .filter(attr =>
                 attr.name !== 'label' &&
@@ -266,7 +343,10 @@ export class PasswordInput extends HTMLElement {
             </div>
         `
 
-        this.removeAttribute('id')
+        if (this.hasAttribute('id')) {
+            this.ignoredIdCallback = true
+            this.removeAttribute('id')
+        }
         for (const attr of hostAriaAttributes) {
             this.ignoredAriaCallbackNames.add(attr.name)
             this.removeAttribute(attr.name)
