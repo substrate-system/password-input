@@ -1,6 +1,5 @@
 {
   "name": "@substrate-system/password-input",
-  "private": true,
   "type": "module",
   "version": "0.0.0",
   "main": "dist/index.js",
