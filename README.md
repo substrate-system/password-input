@@ -26,10 +26,16 @@ Accessible by default &mdash; `aria-*` attributes, the `id` attribute, and a
 - [API](#api)
   * [ESM](#esm)
   * [Common JS](#common-js)
+  * [Attributes](#attributes)
+    + [Supported `aria-*` attributes](#supported-aria--attributes)
+    + [Usage Notes](#usage-notes)
+    + [Example](#example)
 - [Use](#use)
   * [JS](#js)
   * [HTML](#html)
   * [pre-built](#pre-built)
+    + [copy](#copy)
+    + [HTML](#html-1)
 - [CSS](#css)
   * [Import CSS](#import-css)
 - [Notes](#notes)
@@ -58,6 +64,63 @@ import { PasswordInput } from '@substrate-system/password-input'
 ```js
 require('@substrate-system/password-input')
 ```
+
+### Attributes
+
+You can pass attributes on `<password-input>`, and the component maps them to
+the inner `<input>` as described below. Do not pass the `type` attribute.
+That is controlled by the component.
+
+| Attribute | Should pass? | Behavior |
+| --- | --- | --- |
+| `label` | Optional, recommended | Renders visible label text above the input. |
+| `visible` | Optional | If present, initial state is visible text (`type="text"`). If absent, initial state is hidden (`type="password"`). |
+| `id` | Recommended when used with external labels/help text | Moved to the inner `<input id="...">` and removed from `<password-input>`. |
+| `aria-*` | Recommended for accessibility | Any supported ARIA attribute passed on `<password-input>` is moved to the inner `<input>` and removed from `<password-input>`. |
+| Standard input attributes (`name`, `placeholder`, `value`, `autocomplete`, `required`, `disabled`, `readonly`, `minlength`, `maxlength`, `pattern`, etc.) | Optional as needed | Forwarded to the inner `<input>`. |
+
+#### Supported `aria-*` attributes
+
+`aria-activedescendant`, `aria-atomic`, `aria-autocomplete`,
+`aria-braillelabel`, `aria-brailleroledescription`, `aria-busy`,
+`aria-checked`, `aria-colcount`, `aria-colindex`, `aria-colindextext`,
+`aria-colspan`, `aria-controls`, `aria-current`, `aria-describedby`,
+`aria-description`, `aria-details`, `aria-disabled`, `aria-dropeffect`,
+`aria-errormessage`, `aria-expanded`, `aria-flowto`, `aria-grabbed`,
+`aria-haspopup`, `aria-hidden`, `aria-invalid`, `aria-keyshortcuts`,
+`aria-label`, `aria-labelledby`, `aria-level`, `aria-live`, `aria-modal`,
+`aria-multiline`, `aria-multiselectable`, `aria-orientation`, `aria-owns`,
+`aria-placeholder`, `aria-posinset`, `aria-pressed`, `aria-readonly`,
+`aria-relevant`, `aria-required`, `aria-roledescription`, `aria-rowcount`,
+`aria-rowindex`, `aria-rowindextext`, `aria-rowspan`, `aria-selected`,
+`aria-setsize`, `aria-sort`, `aria-valuemax`, `aria-valuemin`,
+`aria-valuenow`, `aria-valuetext`
+
+#### Usage Notes
+
+- Do **not** pass `type`. The component controls `type` internally
+  (`password` or `text`) based on the visibility toggle.
+- If an ARIA attribute changes later (`setAttribute('aria-label', '...')` on
+  `<password-input>`), the inner `<input>` is updated through
+  `attributeChangedCallback`.
+
+#### Example
+
+```html
+<password-input
+    id="account-password"
+    label="New Password"
+    name="password"
+    placeholder="At least 12 characters"
+    autocomplete="new-password"
+    required
+    minlength="12"
+    aria-describedby="password-help">
+</password-input>
+<p id="password-help">Use a strong, unique password.</p>
+```
+
+
 ## Use
 
 This calls the global function `customElements.define`. Just import, then use
@@ -134,4 +197,3 @@ Implementation notes.
 
 Without this guard, the second callback would treat the host removal as a
 real “delete” request and clear the input attribute you just transferred.
-
