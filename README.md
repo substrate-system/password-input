@@ -26,13 +26,14 @@ Accessible by default &mdash; `aria-*` attributes, the `id` attribute, and a
 - [API](#api)
   * [ESM](#esm)
   * [Common JS](#common-js)
-- [CSS](#css)
-  * [Import CSS](#import-css)
-  * [Customize CSS via some variables](#customize-css-via-some-variables)
 - [Use](#use)
   * [JS](#js)
   * [HTML](#html)
   * [pre-built](#pre-built)
+- [CSS](#css)
+  * [Import CSS](#import-css)
+- [Notes](#notes)
+  * [`ignoredAriaCallbackNames` property](#ignoredariacallbacknames-property)
 
 <!-- tocstop -->
 
