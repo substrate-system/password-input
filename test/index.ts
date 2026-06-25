@@ -1,6 +1,6 @@
 import { test } from '@substrate-system/tapzero'
 import { waitFor } from '@substrate-system/dom'
-import '../src/index.js'
+import { PasswordInput } from '../src/index.js'
 
 test('example test', async t => {
     document.body.innerHTML += `
@@ -198,6 +198,39 @@ test('emits show and hide events when visibility changes', async t => {
     button?.click()
 
     t.equal(seen.join(','), 'show,hide', 'should emit show then hide')
+})
+
+test('syncs visibility across all inputs via show/hide events', async t => {
+    document.body.innerHTML = `
+        <password-input class="sync-a" label="A"></password-input>
+        <password-input class="sync-b" label="B"></password-input>
+    `
+
+    await waitFor('password-input')
+    const inputs = document.querySelectorAll<PasswordInput>('password-input')
+    const a = inputs[0]
+    const b = inputs[1]
+
+    // The consumer-side pattern from the example page: listen for the
+    // component's show/hide events and mirror visibility to every input.
+    function sync (ev:Event) {
+        const visible = (ev.target as PasswordInput).isVisible
+        document.querySelectorAll<PasswordInput>('password-input')
+            .forEach(el => { el.isVisible = visible })
+    }
+    document.addEventListener(PasswordInput.event('show'), sync)
+    document.addEventListener(PasswordInput.event('hide'), sync)
+
+    a.querySelector('button')!.click()
+    t.ok(a.isVisible, 'clicked input should be visible')
+    t.ok(b.isVisible, 'other input should follow and become visible')
+
+    b.querySelector('button')!.click()
+    t.ok(!b.isVisible, 'clicked input should be hidden')
+    t.ok(!a.isVisible, 'other input should follow and become hidden')
+
+    document.removeEventListener(PasswordInput.event('show'), sync)
+    document.removeEventListener(PasswordInput.event('hide'), sync)
 })
 
 test('all done', () => {

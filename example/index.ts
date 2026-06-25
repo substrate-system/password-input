@@ -1,5 +1,5 @@
 import '../src/index.css'
-import '../src/index.js'
+import { PasswordInput } from '../src/index.js'
 
 if (import.meta.env.DEV || import.meta.env.MODE === 'staging') {
     localStorage.setItem('DEBUG', 'password-input')
@@ -37,3 +37,16 @@ document.body.innerHTML += `
         </div>
     </form>
 `
+
+// Listen for the component's visibility events and keep every
+// <password-input> on the page in sync. Clicking either input's eye button
+// shows or hides both. The events bubble, so a single delegated listener on
+// `document` covers all of them.
+function syncVisibility (ev:Event) {
+    const visible = (ev.target as PasswordInput).isVisible
+    document.querySelectorAll<PasswordInput>('password-input')
+        .forEach(el => { el.isVisible = visible })
+}
+
+document.addEventListener(PasswordInput.event('show'), syncVisibility)
+document.addEventListener(PasswordInput.event('hide'), syncVisibility)

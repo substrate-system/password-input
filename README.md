@@ -30,6 +30,8 @@ Accessible by default &mdash; `aria-*` attributes, the `id` attribute, and a
     + [Supported `aria-*` attributes](#supported-aria--attributes)
     + [Usage Notes](#usage-notes)
     + [Example](#example)
+- [Events](#events)
+  * [Example: keep several inputs in sync](#example-keep-several-inputs-in-sync)
 - [Use](#use)
   * [JS](#js)
   * [HTML](#html)
@@ -118,6 +120,58 @@ That is controlled by the component.
     aria-describedby="password-help">
 </password-input>
 <p id="password-help">Use a strong, unique password.</p>
+```
+
+
+## Events
+
+The component emits namespaced custom events whenever its visibility changes.
+The events [bubble](https://developer.mozilla.org/en-US/docs/Web/API/Event/bubbles),
+so you can listen on the element itself or on any ancestor.
+
+| Event | Emitted when |
+| --- | --- |
+| `password-input:show` | The input becomes visible (`type="text"`). |
+| `password-input:hide` | The input becomes hidden (`type="password"`). |
+
+Build the event name with the static `PasswordInput.event(...)` helper, or pass
+the string directly. `ev.target` is the `<password-input>` that changed.
+
+```js
+import { PasswordInput } from '@substrate-system/password-input'
+
+const input = document.querySelector('password-input')
+
+input.addEventListener(PasswordInput.event('show'), (ev) => {
+    console.log(ev.target.isVisible)  // true
+})
+```
+
+There is also a short-hand `.on(...)` method on the element that namespaces the
+event name for you:
+
+```js
+input.on('hide', (ev) => { /* ... */ })
+```
+
+### Example: keep several inputs in sync
+
+Because the events bubble, a single delegated listener can keep every
+`<password-input>` on the page in sync &mdash; clicking any input's eye button
+shows or hides them all.
+
+```js
+import { PasswordInput } from '@substrate-system/password-input'
+
+function syncVisibility (ev) {
+    const visible = ev.target.isVisible
+    document.querySelectorAll('password-input').forEach(el => {
+        el.isVisible = visible
+    })
+}
+
+document.addEventListener(PasswordInput.event('show'), syncVisibility)
+document.addEventListener(PasswordInput.event('hide'), syncVisibility)
 ```
 
 
