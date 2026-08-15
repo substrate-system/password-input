@@ -24,6 +24,7 @@ password-input {
             transition: all 0.2s;
             padding: 1rem;
             padding-bottom: 0.8rem;
+            padding-right: 3rem;  /* space for the eye icon */
             width: 100%;
             border: 1px solid;
             border-radius: 0;
